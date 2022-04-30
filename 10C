@@ -1,0 +1,85 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+//algo kraskal
+
+/*
+ * Вначале мы производим сортировку рёбер по неубыванию по их весам.
+
+Добавляем i-ое ребро в наш подграф только в том случае,
+ если данное ребро соединяет две разные компоненты связности,
+ одним из которых является наш подграф. То есть, на каждом шаге добавляется минимальное по весу ребро,
+ один конец которого содержится в нашем подграфе, а другой - еще нет.
+
+Алгоритм завершит свою работу после того, как множество вершин нашего подграфа совпадет с множеством вершин исходного графа.
+ */
+using namespace std;
+
+vector<int> treeID;
+vector<pair<long long, pair<long long, long long>>> graph;
+
+/*
+ * с помощью вызовов функции make_set()мы каждую вершину можем
+ * поместить в свое собственное дерево, то есть, создаем некоторое множество подграфов.
+ */
+int make_set(int n){
+    for (int i = 0; i < n; ++i)
+        treeID[i] = i;
+}
+
+/*
+ * Дальше итерируемся по всем ребрам в отсортированном порядке и смотрим,
+ * принадлежат ли инцидентные вершины текущего ребра разным подграфам с
+ * помощью функции find_set() или нет, если оба конца лежат в разных компонентах,
+ * то объединяем два разных подграфа в один с помощью функции union_sets().
+ */
+int find_set(int v) {
+    if (v == treeID[v])
+        return v;
+    else
+        treeID[v] = find_set(treeID[v]);
+}
+
+void  unite_set(int one, int two) {
+    one = find_set(one);
+    two = find_set(two);
+
+    if (one != two)
+        treeID[one] = two;
+}
+
+int main() {
+    ifstream  in("spantree3.in");
+    ofstream  out("spantree3.out");
+
+    int n, m;
+    long long result = 0;
+     in >> n >> m;
+
+
+    treeID.resize(n);
+
+    for (int i = 0; i < m; i++) {
+        int top1, top2, weight;
+         in >> top1 >> top2 >> weight;
+        graph.push_back(make_pair(weight, make_pair(top1 - 1, top2 - 1)));
+    }
+
+    sort(graph.begin(), graph.end());
+
+   make_set(n);
+
+    for (int i = 0; i < m; ++i) {
+        int one = graph[i].second.first;
+        int two = graph[i].second.second;
+        int weight = graph[i].first;
+
+        if (find_set(one) != find_set(two)) {
+            result += weight;
+            unite_set(one, two);
+        }
+    }
+
+     out << result;
+}
