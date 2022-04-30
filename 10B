@@ -1,0 +1,68 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <cmath>
+
+using namespace std;
+
+vector<vector<int>> graph;
+vector<int> minE;
+vector<int> x, y;
+vector<bool> used;
+
+
+const int INF = INT_MAX;
+
+int main() {
+    ifstream  in("spantree.in");
+    ofstream  out("spantree.out");
+    
+    // cout.precision(/*number*/);  // задает количество знаков после десятичной точки
+    out.precision(10);
+
+    int n;
+     in >> n;
+
+// выделяем память для всех массивов
+
+    graph.resize(n, vector<int>(n));
+    minE.resize(n, INF);
+    x.resize(n);
+    y.resize(n);
+    used.resize(n);
+
+    double minPath = 0;
+
+    //записываем точки 
+    for (int i = 0; i < n; i++) {
+         in >> x[i] >> y[i];
+    }
+// вычисляем значения ребер графа
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            graph[i][j] = (x[i] - x[j]) * (x[i] - x[j]) +
+                          (y[i] - y[j]) * (y[i] - y[j]);
+        }
+    }
+
+    minE[0] = 0;
+    for (int i = 0; i < n; i++) {
+        int v = -1;
+
+        for (int j = 0; j < n; j++)
+            if (!used[j] && (v == -1 || minE[j] < minE[v]))
+                v = j;
+
+        used[v] = true;
+        for (int j = 0; j < n; j++) {
+            if (!used[j] && graph[v][j] < minE[j] && v != j)
+                minE[j] = graph[v][j];
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        minPath  += sqrt(minE[i]);
+    }
+
+     out << minPath ;
+}
